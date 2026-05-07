@@ -89,6 +89,7 @@ RUN --mount=type=cache,target=/root/.bun/install/cache \
 #   - @anthropic-ai/claude-code's postinstall downloads the native Claude
 #     binary (linux-arm64 variant on our image). Without the allowlist
 #     the SDK fails at spawn time with "native binary not found".
+ENV PNPM_HOME="/usr/local/share/pnpm"
 RUN npm install -g pnpm && \
     pnpm config set global-bin-dir /usr/local/bin
 
@@ -102,7 +103,7 @@ RUN --mount=type=cache,target=/root/.cache/pnpm \
 
 RUN --mount=type=cache,target=/root/.cache/pnpm \
     pnpm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" && \
-    find /root /usr/local -path "*claude-code*" -type f -exec chmod a+x {} \; && \
+    node $(find "${PNPM_HOME}" -name "install.cjs" -path "*claude-code*" | head -1) && \
     chmod +x /usr/local/bin/claude
 
 # ---- Entrypoint --------------------------------------------------------------
